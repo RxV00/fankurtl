@@ -35,7 +35,7 @@ const FIXED_LOGO_BASE64: string = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQ
 export const generateProposalPDF = async (data: ProposalData) => {
   const doc = new jsPDF() as jsPDFWithAutoTable;
   const pageWidth = doc.internal.pageSize.width; // 210mm
-  
+
   let fontLoaded = false;
 
   // --- Load Custom Fonts (Roboto) ---
@@ -48,7 +48,7 @@ export const generateProposalPDF = async (data: ProposalData) => {
 
     doc.addFileToVFS('Roboto-Bold.ttf', fontBold);
     doc.addFont('Roboto-Bold.ttf', 'Roboto', 'bold');
-    
+
     doc.setFont('Roboto', 'normal');
     fontLoaded = true;
   } catch (error) {
@@ -73,43 +73,43 @@ export const generateProposalPDF = async (data: ProposalData) => {
     if (FIXED_LOGO_BASE64 && FIXED_LOGO_BASE64.startsWith('data:image')) {
       try {
         const imgProps = doc.getImageProperties(FIXED_LOGO_BASE64);
-        
+
         // --- LOGO BOYUTLANDIRMA ---
         // Genişlik 160mm (Boyut iyi dendiği için korundu)
-        const logoWidth = 160; 
-        const maxHeight = 60; 
-        
+        const logoWidth = 160;
+        const maxHeight = 60;
+
         const logoHeight = (imgProps.height * logoWidth) / imgProps.width; // Calculate height based on ratio
-        
+
         // Eğer yükseklik çok fazla olursa (örn: kare logo), yüksekliği sabitleyip genişliği ayarlayalım
         if (logoHeight > maxHeight) {
-             const fixedHeight = maxHeight;
-             const fixedWidth = (imgProps.width * fixedHeight) / imgProps.height;
-             doc.addImage(FIXED_LOGO_BASE64, 'PNG', -15, y, fixedWidth, fixedHeight);
+          const fixedHeight = maxHeight;
+          const fixedWidth = (imgProps.width * fixedHeight) / imgProps.height;
+          doc.addImage(FIXED_LOGO_BASE64, 'PNG', -15, y, fixedWidth, fixedHeight);
         } else {
-             doc.addImage(FIXED_LOGO_BASE64, 'PNG', -15, y, logoWidth, logoHeight);
+          doc.addImage(FIXED_LOGO_BASE64, 'PNG', -15, y, logoWidth, logoHeight);
         }
 
       } catch (e) {
         console.error("Logo eklenirken hata oluştu:", e);
-        drawTextLogo(x, y + 5); 
+        drawTextLogo(x, y + 5);
       }
     } else {
-      drawTextLogo(x, y + 5); 
+      drawTextLogo(x, y + 5);
     }
   };
 
   const drawTextLogo = (x: number, y: number) => {
     if (fontLoaded) doc.setFont('Roboto', 'bold');
     else doc.setFont('helvetica', 'bold');
-    
+
     doc.setFontSize(32);
     doc.setTextColor(11, 47, 94); // #0B2F5E
     doc.text("Fankur", x, y);
 
     if (fontLoaded) doc.setFont('Roboto', 'normal');
     else doc.setFont('helvetica', 'normal');
-    
+
     doc.setFontSize(8);
     doc.setTextColor(60, 60, 60);
     doc.text("Havalandırma ve Isıtma Sistemleri LTD. ŞTİ.", x, y + 6);
@@ -122,8 +122,8 @@ export const generateProposalPDF = async (data: ProposalData) => {
   // --- Header ---
   // Logo X koordinatı 5 (Sola yaslı)
   // Y koordinatı 10
-  drawLogo(5, 10); 
-  
+  drawLogo(5, 10);
+
   // Date
   setFont('normal');
   doc.setFontSize(10);
@@ -134,13 +134,13 @@ export const generateProposalPDF = async (data: ProposalData) => {
 
   // --- Customer & Subject ---
   // Logo çok büyük olduğu için içerik başlangıcı 85
-  let yPos = 85; 
-  
+  let yPos = 85;
+
   // Project Name - Aligned to x=5
   doc.setFontSize(12);
   setFont('bold');
   doc.text(data.projectName.toUpperCase(), 5, yPos);
-  
+
   // Attention To - Aligned to x=5
   yPos += 7;
   setFont('bold');
@@ -165,32 +165,32 @@ export const generateProposalPDF = async (data: ProposalData) => {
 
   // --- Signatories ---
   yPos += 20;
-  
-  if (data.signatories.length > 0) {
-      const sigCount = data.signatories.length;
-      let positions: number[] = [];
-      if (sigCount === 1) positions = [5];
-      else if (sigCount === 2) positions = [5, 120];
-      else {
-          const margin = 5;
-          const availableWidth = pageWidth - (margin * 2);
-          const step = availableWidth / (sigCount - 1);
-          for(let i=0; i<sigCount; i++) positions.push(margin + (i * step));
-      }
 
-      data.signatories.forEach((sig, index) => {
-          const x = positions[index] || 5;
-          
-          setFont('bold');
-          doc.setTextColor(0, 0, 0);
-          doc.setFontSize(10);
-          doc.text(sig.name.toUpperCase(), x, yPos);
-          
-          setFont('normal');
-          doc.setFontSize(9);
-          doc.setTextColor(0, 50, 200); // Blue email
-          doc.text(sig.email, x, yPos + 5);
-      });
+  if (data.signatories.length > 0) {
+    const sigCount = data.signatories.length;
+    let positions: number[] = [];
+    if (sigCount === 1) positions = [5];
+    else if (sigCount === 2) positions = [5, 120];
+    else {
+      const margin = 5;
+      const availableWidth = pageWidth - (margin * 2);
+      const step = availableWidth / (sigCount - 1);
+      for (let i = 0; i < sigCount; i++) positions.push(margin + (i * step));
+    }
+
+    data.signatories.forEach((sig, index) => {
+      const x = positions[index] || 5;
+
+      setFont('bold');
+      doc.setTextColor(0, 0, 0);
+      doc.setFontSize(10);
+      doc.text(sig.name.toUpperCase(), x, yPos);
+
+      setFont('normal');
+      doc.setFontSize(9);
+      doc.setTextColor(0, 50, 200); // Blue email
+      doc.text(sig.email, x, yPos + 5);
+    });
   }
 
   doc.setTextColor(0, 0, 0);
@@ -232,7 +232,7 @@ export const generateProposalPDF = async (data: ProposalData) => {
       valign: 'middle',
       lineWidth: 0.1,
       lineColor: [200, 200, 200],
-      font: fontLoaded ? 'Roboto' : 'helvetica' 
+      font: fontLoaded ? 'Roboto' : 'helvetica'
     },
     styles: {
       font: fontLoaded ? 'Roboto' : 'helvetica',
@@ -256,7 +256,7 @@ export const generateProposalPDF = async (data: ProposalData) => {
 
   // Total Box
   let finalY = doc.lastAutoTable?.finalY || 150;
-  
+
   finalY += 20;
 
   // Draw Total Box - Aligned to right margin (205)
@@ -265,7 +265,7 @@ export const generateProposalPDF = async (data: ProposalData) => {
   doc.rect(145, finalY, 60, 10, 'F');
   doc.setDrawColor(200, 200, 200);
   doc.rect(145, finalY, 60, 10, 'S');
-  
+
   setFont('bold');
   doc.setFontSize(10);
   doc.text("TOPLAM TUTAR:", 148, finalY + 6.5);
@@ -276,37 +276,37 @@ export const generateProposalPDF = async (data: ProposalData) => {
   doc.setFontSize(10);
   setFont('bold');
   doc.text("NOTLAR / ŞARTLAR:", 5, finalY); // Aligned to x=5
-  
+
   setFont('normal');
   doc.setFontSize(9);
   doc.setTextColor(60, 60, 60);
   let noteY = finalY + 6;
-  
+
   data.notes.forEach((note, index) => {
     if (noteY > 260) {
-        doc.addPage();
-        noteY = 20;
+      doc.addPage();
+      noteY = 20;
     }
     const noteText = `${index + 1} - ${note}`;
     const splitNote = doc.splitTextToSize(noteText, 200); // Wider text
     doc.text(splitNote, 5, noteY); // Aligned to x=5
-    noteY += (splitNote.length * 4) + 2; 
+    noteY += (splitNote.length * 4) + 2;
   });
 
   // --- Footer ---
   const footerY = 280;
   const pageCount = doc.getNumberOfPages();
   for (let i = 1; i <= pageCount; i++) {
-      doc.setPage(i);
-      doc.setDrawColor(200, 200, 200);
-      doc.setLineWidth(0.5);
-      doc.line(5, footerY, 205, footerY); // Adjusted for margins
-      
-      doc.setFontSize(8);
-      doc.setTextColor(100, 100, 100);
-      doc.text("FANKUR İKLİMLENDİRME İNŞ. TAAH. SAN. ve TİC. LTD. ŞTİ.", 105, footerY + 5, { align: 'center' });
-      doc.text("Adres: Prof. Dr. Necmettin Erbakan Caddesi Erdoğan Apt No 31 Daire 4 - İstanbul", 105, footerY + 9, { align: 'center' });
-      doc.text("Tel: +535 708 54 44  |  Email: info@fankur.com  |  Web: www.fankur.com", 105, footerY + 13, { align: 'center' });
+    doc.setPage(i);
+    doc.setDrawColor(200, 200, 200);
+    doc.setLineWidth(0.5);
+    doc.line(5, footerY, 205, footerY); // Adjusted for margins
+
+    doc.setFontSize(8);
+    doc.setTextColor(100, 100, 100);
+    doc.text("FANKUR Havalandırma ve Isıtma Sistemleri  LTD. ŞTİ.", 105, footerY + 5, { align: 'center' });
+    doc.text("Adres: Prof. Dr. Necmettin Erbakan Caddesi Erdoğan Apt No 31 Daire 4 - İstanbul", 105, footerY + 9, { align: 'center' });
+    doc.text("Tel: +535 708 54 44  |  Email: info@fankur.com  |  Web: www.fankur.com", 105, footerY + 13, { align: 'center' });
   }
   doc.setPage(pageCount);
 
@@ -314,10 +314,10 @@ export const generateProposalPDF = async (data: ProposalData) => {
   // PAGE 2: DISCOVERY
   // ==========================================
   doc.addPage();
-  
+
   // Header Logo - Daha sola (5)
-  drawLogo(5, 10); 
-  
+  drawLogo(5, 10);
+
   // Date Box - Shifted right
   doc.setDrawColor(0);
   doc.rect(175, 15, 30, 8); // 165 -> 175
@@ -357,7 +357,7 @@ export const generateProposalPDF = async (data: ProposalData) => {
   ]);
 
   autoTable(doc, {
-    startY: 85, 
+    startY: 85,
     head: discHead,
     body: discBody,
     theme: 'grid',
@@ -383,10 +383,10 @@ export const generateProposalPDF = async (data: ProposalData) => {
       2: { halign: 'left' }
     },
     didParseCell: (data) => {
-        if (data.row.index === discBody.length - 1) {
-            data.cell.styles.fontStyle = 'bold';
-            data.cell.styles.fillColor = [240, 240, 240];
-        }
+      if (data.row.index === discBody.length - 1) {
+        data.cell.styles.fontStyle = 'bold';
+        data.cell.styles.fillColor = [240, 240, 240];
+      }
     }
   });
 
