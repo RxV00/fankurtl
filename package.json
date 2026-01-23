@@ -2,7 +2,7 @@
   "name": "fankur-offer-generator",
   "private": true,
   "version": "0.0.0",
-  "homepage": "https://RxV00.github.io/fankurtl",
+  "homepage": "https://rxv00.github.io/fankurtl/",
   "type": "module",
   "scripts": {
     "dev": "vite",
