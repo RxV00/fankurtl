@@ -1,3 +1,4 @@
+
 export interface MaterialItem {
   id: string;
   productCode: string;
@@ -7,6 +8,7 @@ export interface MaterialItem {
   shipQty: number;
   unit: string;
   unitPrice: number;
+  manualTotal?: number; // Optional override for line item total
 }
 
 export interface DiscoveryItem {
@@ -38,6 +40,10 @@ export interface ProposalData {
   // Dynamic Titles
   page1Title: string;
   page2Title: string;
+  productTitle?: string; // New field for product title
+
+  // Financials
+  manualTotal?: number; // Optional manual override for total amount
 
   // Lists
   materials: MaterialItem[];

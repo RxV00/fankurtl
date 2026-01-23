@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, FileDown } from 'lucide-react';
+import { Plus, Trash2, FileDown, Calculator } from 'lucide-react';
 import { ProposalData, MaterialItem, DiscoveryItem, Signatory } from './types';
 import { InputSection } from './components/InputSection';
 import { generateProposalPDF } from './services/pdfService';
@@ -38,7 +38,9 @@ export default function App() {
     signatories: initialSignatories,
     materials: initialMaterials,
     discovery: initialDiscovery,
-    notes: initialNotes
+    notes: initialNotes,
+    productTitle: 'FRÄNKISCHE',
+    manualTotal: undefined
   });
 
   // --- Handlers for Materials ---
@@ -140,7 +142,13 @@ export default function App() {
   };
 
   // Calculate Running Total
-  const grandTotal = data.materials.reduce((sum, m) => sum + (m.requestQty * m.unitPrice), 0);
+  // Sum of (manualTotal if exists, else qty * price)
+  const calculatedTotal = data.materials.reduce((sum, m) => {
+    const lineTotal = m.manualTotal !== undefined ? m.manualTotal : (m.requestQty * m.unitPrice);
+    return sum + lineTotal;
+  }, 0);
+
+  const displayTotal = data.manualTotal && data.manualTotal > 0 ? data.manualTotal : calculatedTotal;
 
   return (
     <div className="min-h-screen bg-slate-50 pb-20 font-sans text-gray-900">
@@ -202,6 +210,16 @@ export default function App() {
                 className="w-full p-2 border border-gray-300 rounded bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none shadow-sm" 
               />
             </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Ürün Başlığı (Logo Yanı)</label>
+              <input 
+                type="text" 
+                value={data.productTitle || ''}
+                onChange={(e) => setData({...data, productTitle: e.target.value})}
+                className="w-full p-2 border border-gray-300 rounded bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none shadow-sm" 
+                placeholder="Örn: FRÄNKISCHE"
+              />
+            </div>
           </div>
         </InputSection>
 
@@ -252,8 +270,23 @@ export default function App() {
                     <td className="px-2 py-2">
                       <input type="number" step="0.01" className="w-full p-1.5 border border-gray-300 rounded bg-white text-gray-900 text-sm text-right" value={item.unitPrice} onChange={(e) => updateMaterial(item.id, 'unitPrice', Number(e.target.value))} />
                     </td>
-                    <td className="px-3 py-2 text-right font-medium text-gray-900">
-                      {(item.requestQty * item.unitPrice).toFixed(2)}
+                    <td className="px-2 py-2 text-right">
+                      {/* Tutar Input: Allows manual override */}
+                      <input 
+                        type="number"
+                        step="0.01"
+                        className={`w-full p-1.5 border rounded text-sm text-right outline-none focus:ring-2 focus:ring-blue-500 ${
+                          item.manualTotal !== undefined 
+                            ? 'border-blue-300 bg-blue-50 text-blue-900 font-semibold' 
+                            : 'border-gray-300 bg-gray-50 text-gray-700'
+                        }`}
+                        placeholder={(item.requestQty * item.unitPrice).toFixed(2)}
+                        value={item.manualTotal !== undefined ? item.manualTotal : (item.requestQty * item.unitPrice).toFixed(2)}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          updateMaterial(item.id, 'manualTotal', val === '' ? undefined : parseFloat(val));
+                        }}
+                      />
                     </td>
                     <td className="px-2 py-2 text-center">
                       <button onClick={() => removeMaterial(item.id)} className="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 transition-colors">
@@ -265,12 +298,30 @@ export default function App() {
               </tbody>
             </table>
           </div>
-          <div className="mt-4 flex justify-between items-center bg-gray-50 p-4 rounded-lg border border-gray-200">
-            <button onClick={addMaterial} className="flex items-center gap-2 text-blue-600 font-medium hover:bg-blue-100 px-4 py-2 rounded transition-colors">
+          <div className="mt-4 flex flex-col md:flex-row justify-between items-center bg-gray-50 p-4 rounded-lg border border-gray-200 gap-4">
+            <button onClick={addMaterial} className="flex items-center gap-2 text-blue-600 font-medium hover:bg-blue-100 px-4 py-2 rounded transition-colors self-start md:self-center">
               <Plus className="w-4 h-4" /> Satır Ekle
             </button>
-            <div className="text-xl font-bold text-slate-800">
-              TOPLAM: {grandTotal.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} {data.currency}
+            
+            <div className="flex flex-col md:flex-row items-end md:items-center gap-4">
+              <div className="flex flex-col items-end">
+                <span className="text-xs text-gray-500 mb-1">Hesaplanan (Satır Toplamı): {calculatedTotal.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} {data.currency}</span>
+                <div className="flex items-center gap-2">
+                  <label className="text-sm font-medium text-gray-700">Genel Manuel Toplam:</label>
+                  <input 
+                    type="number"
+                    step="0.01"
+                    placeholder="Otomatik"
+                    value={data.manualTotal || ''}
+                    onChange={(e) => setData({...data, manualTotal: e.target.value ? Number(e.target.value) : undefined})}
+                    className="w-32 p-1.5 border border-gray-300 rounded bg-white text-right text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                  />
+                </div>
+              </div>
+              
+              <div className="text-xl font-bold text-slate-800 bg-white px-4 py-2 rounded border border-gray-200 shadow-sm min-w-[200px] text-right">
+                {displayTotal.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} {data.currency}
+              </div>
             </div>
           </div>
         </InputSection>
