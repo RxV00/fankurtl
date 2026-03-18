@@ -221,6 +221,18 @@ export default function App() {
                 placeholder="Örn: FRÄNKISCHE"
               />
             </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Para Birimi</label>
+              <select
+                value={data.currency}
+                onChange={(e) => setData({...data, currency: e.target.value})}
+                className="w-full p-2 border border-gray-300 rounded bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none shadow-sm"
+              >
+                <option value="EUR">EUR (€)</option>
+                <option value="TL">TL (₺)</option>
+                <option value="USD">USD ($)</option>
+              </select>
+            </div>
           </div>
         </InputSection>
 
@@ -263,13 +275,13 @@ export default function App() {
                       <input className="w-full p-1.5 border border-gray-300 rounded bg-white text-gray-900 text-sm" value={item.dimensions} onChange={(e) => updateMaterial(item.id, 'dimensions', e.target.value)} />
                     </td>
                     <td className="px-2 py-2">
-                      <input type="number" className="w-full p-1.5 border border-gray-300 rounded bg-white text-gray-900 text-sm text-center" value={item.requestQty} onChange={(e) => updateMaterial(item.id, 'requestQty', Number(e.target.value))} />
+                      <input type="number" className="w-full p-1.5 border border-gray-300 rounded bg-white text-gray-900 text-sm text-center" value={item.requestQty || ''} onChange={(e) => updateMaterial(item.id, 'requestQty', e.target.value === '' ? 0 : Number(e.target.value))} />
                     </td>
                     <td className="px-2 py-2">
                       <input className="w-full p-1.5 border border-gray-300 rounded bg-white text-gray-900 text-sm text-center" value={item.unit} onChange={(e) => updateMaterial(item.id, 'unit', e.target.value)} />
                     </td>
                     <td className="px-2 py-2">
-                      <input type="number" step="0.01" className="w-full p-1.5 border border-gray-300 rounded bg-white text-gray-900 text-sm text-right" value={item.unitPrice} onChange={(e) => updateMaterial(item.id, 'unitPrice', Number(e.target.value))} />
+                      <input type="number" step="0.01" className="w-full p-1.5 border border-gray-300 rounded bg-white text-gray-900 text-sm text-right" value={item.unitPrice || ''} onChange={(e) => updateMaterial(item.id, 'unitPrice', e.target.value === '' ? 0 : Number(e.target.value))} />
                     </td>
                     <td className="px-2 py-2 text-right">
                       {/* Tutar Input: Allows manual override */}
