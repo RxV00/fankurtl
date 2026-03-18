@@ -282,7 +282,7 @@ export default function App() {
                             : 'border-gray-300 bg-gray-50 text-gray-700'
                         }`}
                         placeholder={(item.requestQty * item.unitPrice).toFixed(2)}
-                        value={item.manualTotal !== undefined ? item.manualTotal : (item.requestQty * item.unitPrice).toFixed(2)}
+                        value={item.manualTotal !== undefined ? item.manualTotal : ''}
                         onChange={(e) => {
                           const val = e.target.value;
                           updateMaterial(item.id, 'manualTotal', val === '' ? undefined : parseFloat(val));
