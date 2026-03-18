@@ -229,7 +229,10 @@ export const generateProposalPDF = async (data: ProposalData) => {
   yPos += 20;
   doc.setFontSize(12);
   setFont('bold');
-  doc.text(data.page1Title || "YERDEN ISITMA MALZEME LİSTESİ", 5, yPos); // Aligned to x=5
+  const p1Title = data.page1Title || '';
+  if (p1Title) {
+    doc.text(p1Title, 5, yPos); // Aligned to x=5
+  }
 
   // Calculate total: If item has manualTotal, use it. Otherwise use qty*price.
   const calculatedTotal = data.materials.reduce((sum, item) => {
@@ -354,11 +357,7 @@ export const generateProposalPDF = async (data: ProposalData) => {
   // ==========================================
   // PAGE 2: DISCOVERY (only if there are items with meaningful data)
   // ==========================================
-  const hasDiscoveryData = data.discovery.some(
-    (item) => (item.roomName && item.roomName.trim() !== '') || item.area > 0 || item.pipeLength > 0
-  );
-
-  if (hasDiscoveryData) {
+  if (data.includePage2) {
     doc.addPage();
 
     // Header Logo - Daha sola (5)
@@ -377,7 +376,10 @@ export const generateProposalPDF = async (data: ProposalData) => {
     // Title
     doc.setFontSize(14);
     setFont('normal'); // Title font
-    doc.text(data.page2Title || "YERDEN ISITMA KEŞİF ÖZETİ", 5, 80); // x: 15 -> 5
+    const p2Title = data.page2Title || '';
+    if (p2Title) {
+      doc.text(p2Title, 5, 80); // x: 15 -> 5
+    }
 
     // Discovery Table
     const discHead = [

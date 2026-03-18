@@ -40,7 +40,8 @@ export default function App() {
     discovery: initialDiscovery,
     notes: initialNotes,
     productTitle: 'FRÄNKISCHE',
-    manualTotal: undefined
+    manualTotal: undefined,
+    includePage2: true
   });
 
   // --- Handlers for Materials ---
@@ -349,7 +350,20 @@ export default function App() {
         </InputSection>
 
         {/* DISCOVERY LIST */}
-        <InputSection title="Sayfa 2: Yerden Isıtma Keşfi">
+        <InputSection title={
+          <div className="flex items-center justify-between w-full">
+            <span>Sayfa 2: Yerden Isıtma Keşfi</span>
+            <label className="flex items-center gap-2 cursor-pointer text-sm font-normal">
+              <input
+                type="checkbox"
+                checked={data.includePage2}
+                onChange={(e) => setData({...data, includePage2: e.target.checked})}
+                className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+              />
+              <span className="text-gray-600">Bu sayfayı PDF'e dahil et</span>
+            </label>
+          </div>
+        }>
           <div className="mb-4">
              <label className="block text-sm font-medium text-gray-700 mb-1">Sayfa Başlığı</label>
              <input 

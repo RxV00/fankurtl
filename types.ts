@@ -42,6 +42,9 @@ export interface ProposalData {
   page2Title: string;
   productTitle?: string; // New field for product title
 
+  // Page visibility
+  includePage2: boolean; // Whether to include page 2 (discovery) in PDF
+
   // Financials
   manualTotal?: number; // Optional manual override for total amount
 
