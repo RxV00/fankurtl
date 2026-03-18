@@ -327,14 +327,14 @@ export const generateProposalPDF = async (data: ProposalData) => {
   let noteY = finalY + 6;
 
   data.notes.forEach((note, index) => {
-    if (noteY > 260) {
-      doc.addPage();
-      noteY = 20;
-    }
+    if (noteY > 270) return; // Stop if we'd overlap the footer
     const noteText = `${index + 1} - ${note}`;
     const splitNote = doc.splitTextToSize(noteText, 200); // Wider text
+    // Check if the full note would overflow into footer
+    const noteHeight = (splitNote.length * 4) + 2;
+    if (noteY + noteHeight > 270) return;
     doc.text(splitNote, 5, noteY); // Aligned to x=5
-    noteY += (splitNote.length * 4) + 2;
+    noteY += noteHeight;
   });
 
   // --- Footer ---
