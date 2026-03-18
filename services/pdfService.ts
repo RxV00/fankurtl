@@ -352,87 +352,93 @@ export const generateProposalPDF = async (data: ProposalData) => {
   doc.setPage(pageCount);
 
   // ==========================================
-  // PAGE 2: DISCOVERY
+  // PAGE 2: DISCOVERY (only if there are items with meaningful data)
   // ==========================================
-  doc.addPage();
+  const hasDiscoveryData = data.discovery.some(
+    (item) => (item.roomName && item.roomName.trim() !== '') || item.area > 0 || item.pipeLength > 0
+  );
 
-  // Header Logo - Daha sola (5)
-  drawLogo(5, 10);
+  if (hasDiscoveryData) {
+    doc.addPage();
 
-  // Product Title
-  drawProductTitle(10);
+    // Header Logo - Daha sola (5)
+    drawLogo(5, 10);
 
-  // Date Box - Shifted right
-  doc.setDrawColor(0);
-  doc.rect(175, 30, 30, 8); // 165 -> 175
-  doc.setFontSize(10);
-  doc.setTextColor(0);
-  doc.text(dateStr, 190, 35, { align: 'center' }); // 180 -> 190
+    // Product Title
+    drawProductTitle(10);
 
-  // Title
-  doc.setFontSize(14);
-  setFont('normal'); // Title font
-  doc.text(data.page2Title || "YERDEN ISITMA KEŞİF ÖZETİ", 5, 80); // x: 15 -> 5
+    // Date Box - Shifted right
+    doc.setDrawColor(0);
+    doc.rect(175, 30, 30, 8); // 165 -> 175
+    doc.setFontSize(10);
+    doc.setTextColor(0);
+    doc.text(dateStr, 190, 35, { align: 'center' }); // 180 -> 190
 
-  // Discovery Table
-  const discHead = [
-    ['#', 'KAT', 'MAHAL', 'ALAN\n(m²)', 'Yoğunluk\n(mt/m²)', 'BORU\n(mt)', 'DEVRE', 'TERM.', 'KOLLEKTÖR']
-  ];
+    // Title
+    doc.setFontSize(14);
+    setFont('normal'); // Title font
+    doc.text(data.page2Title || "YERDEN ISITMA KEŞİF ÖZETİ", 5, 80); // x: 15 -> 5
 
-  const discBody = data.discovery.map((item, index) => [
-    (index + 1).toString(),
-    item.floor,
-    item.roomName,
-    item.area.toLocaleString('tr-TR'),
-    item.pipeDensity.toString(),
-    `${item.pipeLength}`,
-    item.circuits || '',
-    item.thermostat || '',
-    item.collector || ''
-  ]);
+    // Discovery Table
+    const discHead = [
+      ['#', 'KAT', 'MAHAL', 'ALAN\n(m²)', 'Yoğunluk\n(mt/m²)', 'BORU\n(mt)', 'DEVRE', 'TERM.', 'KOLLEKTÖR']
+    ];
 
-  const totalArea = data.discovery.reduce((sum, i) => sum + i.area, 0);
-  const totalPipe = data.discovery.reduce((sum, i) => sum + i.pipeLength, 0);
-  const totalCircuits = data.discovery.reduce((sum, i) => sum + (Number(i.circuits) || 0), 0);
-  const totalThermostats = data.discovery.reduce((sum, i) => sum + (Number(i.thermostat) || 0), 0);
+    const discBody = data.discovery.map((item, index) => [
+      (index + 1).toString(),
+      item.floor,
+      item.roomName,
+      item.area.toLocaleString('tr-TR'),
+      item.pipeDensity.toString(),
+      `${item.pipeLength}`,
+      item.circuits || '',
+      item.thermostat || '',
+      item.collector || ''
+    ]);
 
-  discBody.push([
-    '', 'GENEL TOPLAM', '', `${totalArea.toLocaleString('tr-TR')}`, '', `${totalPipe}`, `${totalCircuits}`, `${totalThermostats}`, ''
-  ]);
+    const totalArea = data.discovery.reduce((sum, i) => sum + i.area, 0);
+    const totalPipe = data.discovery.reduce((sum, i) => sum + i.pipeLength, 0);
+    const totalCircuits = data.discovery.reduce((sum, i) => sum + (Number(i.circuits) || 0), 0);
+    const totalThermostats = data.discovery.reduce((sum, i) => sum + (Number(i.thermostat) || 0), 0);
 
-  autoTable(doc, {
-    startY: 85,
-    head: discHead,
-    body: discBody,
-    theme: 'grid',
-    margin: { left: 5, right: 5 }, // 5mm margins
-    headStyles: {
-      fillColor: [50, 50, 50],
-      textColor: 255,
-      fontStyle: 'bold',
-      halign: 'center',
-      valign: 'middle',
-      font: fontLoaded ? 'Roboto' : 'helvetica'
-    },
-    styles: {
-      font: fontLoaded ? 'Roboto' : 'helvetica',
-      fontSize: 9,
-      textColor: 0,
-      lineWidth: 0.1,
-      lineColor: [200, 200, 200],
-      halign: 'center',
-      valign: 'middle'
-    },
-    columnStyles: {
-      2: { halign: 'left' }
-    },
-    didParseCell: (data) => {
-      if (data.row.index === discBody.length - 1) {
-        data.cell.styles.fontStyle = 'bold';
-        data.cell.styles.fillColor = [240, 240, 240];
+    discBody.push([
+      '', 'GENEL TOPLAM', '', `${totalArea.toLocaleString('tr-TR')}`, '', `${totalPipe}`, `${totalCircuits}`, `${totalThermostats}`, ''
+    ]);
+
+    autoTable(doc, {
+      startY: 85,
+      head: discHead,
+      body: discBody,
+      theme: 'grid',
+      margin: { left: 5, right: 5 }, // 5mm margins
+      headStyles: {
+        fillColor: [50, 50, 50],
+        textColor: 255,
+        fontStyle: 'bold',
+        halign: 'center',
+        valign: 'middle',
+        font: fontLoaded ? 'Roboto' : 'helvetica'
+      },
+      styles: {
+        font: fontLoaded ? 'Roboto' : 'helvetica',
+        fontSize: 9,
+        textColor: 0,
+        lineWidth: 0.1,
+        lineColor: [200, 200, 200],
+        halign: 'center',
+        valign: 'middle'
+      },
+      columnStyles: {
+        2: { halign: 'left' }
+      },
+      didParseCell: (data) => {
+        if (data.row.index === discBody.length - 1) {
+          data.cell.styles.fontStyle = 'bold';
+          data.cell.styles.fillColor = [240, 240, 240];
+        }
       }
-    }
-  });
+    });
+  }
 
   doc.save(`Fankur_Teklif_${data.projectName.replace(/\s+/g, '_')}.pdf`);
 };
